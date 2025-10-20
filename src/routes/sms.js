@@ -18,6 +18,7 @@ router.get("/history", async (req, res) => {
         c.firstname,
         c.lastname,
         s.campaign_name,
+        s.media_url,
         COALESCE(s.sent_at, s.created_at) AS date,
         CASE WHEN s.direction = 'outbound'
              THEN s.from_number
@@ -32,8 +33,8 @@ router.get("/history", async (req, res) => {
       FROM hello_hearing.sms_messages s
       LEFT JOIN hello_hearing.contacts c
       ON s.contact_gcid = c.gcid
-      WHERE hello_hearing.norm_phone(from_number) = hello_hearing.norm_phone($1)
-         OR hello_hearing.norm_phone(to_number)   = hello_hearing.norm_phone($1)
+      WHERE hello_hearing.norm_phone(s.from_number) = hello_hearing.norm_phone($1)
+         OR hello_hearing.norm_phone(s.to_number)   = hello_hearing.norm_phone($1)
       ORDER BY COALESCE(s.sent_at, s.created_at) ASC
       LIMIT 500
     `;
