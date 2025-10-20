@@ -4,6 +4,7 @@
   "engines": {
     "node": ">=18"
   },
+  "main": "src/index.js",
   "dependencies": {
     "@google-cloud/cloud-sql-connector": "^1.5.0",
     "@google-cloud/functions-framework": "^4.0.0",
