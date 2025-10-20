@@ -14,6 +14,7 @@ router.get("/history", async (req, res) => {
     const sql = `
       SELECT
         c.gcid,
+        s.source_id,
         c.firstname,
         c.lastname,
         s.campaign_name,
