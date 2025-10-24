@@ -46,7 +46,7 @@ export async function fetchRecentDealsFromHubSpot({
   hours = 1,
   overlapMinutes = 10,
   properties = HS_DEAL_PROPS,
-  pageSize = 100,
+  pageSize = 200,
 } = {}) {
   const token = process.env.HUBSPOT_TOKEN;
   if (!token) throw new Error("Missing HUBSPOT_TOKEN");

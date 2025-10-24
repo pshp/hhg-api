@@ -86,7 +86,7 @@ export async function fetchRecentContactsFromHubSpot({
   hours = 1,
   overlapMinutes = 10,
   properties = HS_CONTACT_PROPS,
-  pageSize = 100,
+  pageSize = 200,
 } = {}) {
   const token = process.env.HUBSPOT_TOKEN;
   if (!token) throw new Error("Missing HUBSPOT_TOKEN");
