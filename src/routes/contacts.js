@@ -112,7 +112,7 @@ function hsToDb(p) {
 // POST /contacts/sync?dryrun=true&hours=4&overlapMinutes=10&pageSize=100&mode=incremental|force
 router.post("/sync", async (req, res) => {
   try {
-    const hours          = req.query.hours          !== undefined ? Number(req.query.hours)          : 4;
+    const hours          = req.query.hours          !== undefined ? Number(req.query.hours)          : 1;
     const overlapMinutes = req.query.overlapMinutes !== undefined ? Number(req.query.overlapMinutes) : 10;
     const pageSize       = req.query.pageSize       !== undefined ? Number(req.query.pageSize)       : 100;
     const dryRun         = String(req.query.dryrun ?? "").toLowerCase() === "true";

@@ -83,7 +83,7 @@ export const HS_CONTACT_PROPS = [
 ];
 
 export async function fetchRecentContactsFromHubSpot({
-  hours = 4,
+  hours = 1,
   overlapMinutes = 10,
   properties = HS_CONTACT_PROPS,
   pageSize = 100,

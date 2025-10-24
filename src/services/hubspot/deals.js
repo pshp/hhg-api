@@ -43,7 +43,7 @@ export const HS_DEAL_PROPS = [
 ];
 
 export async function fetchRecentDealsFromHubSpot({
-  hours = 4,
+  hours = 1,
   overlapMinutes = 10,
   properties = HS_DEAL_PROPS,
   pageSize = 100,
