@@ -46,7 +46,7 @@ function hsToDb(p) {
 
     // hearing-aid details
     type_of_future_hearing_aids:      clean(p.type_of_future_hearing_aids),
-    tech_level_future_hearing_aids:   clean(p.tech_level_future_hearing_aid_fitted ?? p.tech_level_future_hearing_aids),
+    tech_level_future_hearing_aids:   clean(p.tech_level_future_hearing_aids),
     brand_hearing_aid_fitted:         clean(p.brand_hearing_aid_fitted),
     tech_level_hearing_aid_fitted:    clean(p.tech_level_hearing_aid_fitted),
     style_hearing_aid_fitted:         clean(p.style_hearing_aid_fitted),
@@ -65,7 +65,7 @@ function hsToDb(p) {
     main_motivation:                 clean(p.main_motivation),
     currently_using_hearing_aids:    clean(p.currently_using_hearing_aids),
     how_soon:                        clean(p.how_soon),
-    recent_hearing_test:             clean(p.recent_hearing_tes ?? p.recent_hearing_test),
+    recent_hearing_test:             clean(p.recent_hearing_test)
   };
 }
 
