@@ -18,7 +18,6 @@ const CAST = {
   dealtype: s,
   dealname: s,
   dealstage: s,
-  status: s,
   closing_reason: s,
   closedate: ts,
   expected_revenue: n,
@@ -51,7 +50,6 @@ const CAST = {
   how_soon: s,
   recent_hearing_test: s,
 
-  last_source: s,
   source_id: s,
 
   hubspot_id: s,
@@ -112,7 +110,7 @@ export async function getDealByHubspotId(hubspotId) {
 
 export async function listDeals({ since, limit, offset } = {}) {
   const db = await dbWithSchema();
-  let q = db.selectFrom("deals").selectAll().orderBy("hubspot_updated_at asc");
+  let q = db.selectFrom("deals").selectAll().orderBy("hubspot_created_at", "asc");
 
   if (since) q = q.where("hubspot_updated_at", ">=", since);
   if (typeof limit === "number") q = q.limit(limit);

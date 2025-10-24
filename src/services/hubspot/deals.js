@@ -71,7 +71,7 @@ export async function fetchRecentDealsFromHubSpot({
           ],
         },
       ],
-      sorts: [{ propertyName: "hs_lastmodifieddate", direction: "ASCENDING" }],
+      sorts: [{ propertyName: "createdate", direction: "ASCENDING" }],
       properties,
       limit: pageSize,
       after,
