@@ -50,6 +50,8 @@ export const HS_CONTACT_PROPS = [
   "ip_address",
   "phone_os",
   "segment",
+  "overflow_timeout",
+  "overflow_timeout_timestamp",
 
   "patient_lifecycle_stage",
   "inquiry_for",

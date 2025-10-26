@@ -72,6 +72,8 @@ const CAST = {
   ip_address: s,
   phone_os: s,
   segment: s,
+  overflow_timeout: s,
+  overflow_timeout_timestamp: ts,
 
   // Process
   patient_lifecycle_stage: s,

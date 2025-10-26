@@ -84,6 +84,8 @@ function hsToDb(p) {
     ip_address: clean(p.ip_address),
     phone_os: clean(p.phone_os),
     segment: clean(p.segment),
+    overflow_timeout: clean(p.overflow_timeout),
+    overflow_timeout_timestamp: clean(p.overflow_timeout_timestamp),
 
     // Process
     patient_lifecycle_stage: clean(p.patient_lifecycle_stage),
