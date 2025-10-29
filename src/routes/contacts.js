@@ -209,10 +209,8 @@ router.post("/sync", async (req, res) => {
       const row = hsToDb(hsMap.get(id));
       // required by schema: gcid must be present
       const hasGcid = !!row.gcid;
-      // likely needed by your CHECK constraint
-      const hasPhone = !!row.mobile || !!row.landline;
 
-      if (!hasGcid || !hasPhone) {
+      if (!hasGcid) {
         skipped_inserts++; skipped_insert_ids.push(id);
         continue;
       }
