@@ -1,5 +1,6 @@
 // src/queries/contacts.js
 import { Kysely, PostgresDialect, sql } from "kysely";
+import { validate as isUuid } from "uuid";
 import { getDb } from "../db.js";
 
 // casters
@@ -7,11 +8,11 @@ const nil = (v) =>
   v === undefined || v === null || (typeof v === "string" && v.trim() === "")
     ? null
     : v;
-const s  = (v) => nil(v);
-const u  = (v) => (nil(v) === null ? null : sql`${v}::uuid`);
-const n  = (v) => (nil(v) === null ? null : sql`${v}::numeric`);
+const s = (v) => nil(v);
+const u = (v) => (nil(v) === null ? null : sql`${v}::uuid`);
+const n = (v) => (nil(v) === null ? null : sql`${v}::numeric`);
 const ts = (v) => (nil(v) === null ? null : sql`${v}::timestamptz`);
-const b  = (v) => (nil(v) === null ? null : sql`${v}::boolean`);
+const b = (v) => (nil(v) === null ? null : sql`${v}::boolean`);
 
 const CAST = {
   // PK
@@ -129,20 +130,7 @@ export async function createContact(data) {
     .executeTakeFirst(); // { hubspot_id }
 }
 
-// UPDATE by hubspot_id
-export async function updateContact(hubspotId, patch) {
-  const db = await dbWithSchema();
-  const set = normalize(patch);
-  const row = await db
-    .updateTable("contacts")
-    .set(set)
-    .where("hubspot_id", "=", String(hubspotId))
-    .returning(["hubspot_id"])
-    .executeTakeFirst();
-  return { updated: !!row, hubspot_id: row?.hubspot_id };
-}
-
-// UPDATE by gcid (fallback)
+// UPDATE by gcid
 export async function updateContactByGcid(gcid, patch) {
   const db = await dbWithSchema();
   const set = normalize(patch);
@@ -155,7 +143,43 @@ export async function updateContactByGcid(gcid, patch) {
   return { updated: !!row, hubspot_id: row?.hubspot_id };
 }
 
-// READ
+// UPDATE by hubspot_id
+export async function updateContactByHubspotId(hubspotId, patch) {
+  const db = await dbWithSchema();
+  const set = normalize(patch);
+  const row = await db
+    .updateTable("contacts")
+    .set(set)
+    .where("hubspot_id", "=", String(hubspotId))
+    .returning(["hubspot_id"])
+    .executeTakeFirst();
+  return { updated: !!row, hubspot_id: row?.hubspot_id };
+}
+
+// UPDATE by either id
+export async function updateContactByEither(id, patch) {
+  const byUuid = isUuid(id);
+  const r = byUuid
+    ? await updateContactByGcid(id, patch)
+    : await updateContactByHubspotId(id, patch);
+  if (!r?.updated) return { updated: false };
+  const row = byUuid
+    ? await getContactByGcid(id)
+    : await getContactByHubspotId(id);
+  return { updated: true, row };
+}
+
+// READ by gcid
+export async function getContactByGcid(gcid) {
+  const db = await dbWithSchema();
+  return db
+    .selectFrom("contacts")
+    .selectAll()
+    .where("gcid", "=", String(gcid))
+    .executeTakeFirst();
+}
+
+// READ by hubspot id
 export async function getContactByHubspotId(hubspotId) {
   const db = await dbWithSchema();
   return db
@@ -165,9 +189,17 @@ export async function getContactByHubspotId(hubspotId) {
     .executeTakeFirst();
 }
 
+// READ by either id
+export async function getContactByEither(id) {
+  return isUuid(id) ? getContactByGcid(id) : getContactByHubspotId(id);
+}
+
 export async function listContacts({ since, limit, offset } = {}) {
   const db = await dbWithSchema();
-  let q = db.selectFrom("contacts").selectAll().orderBy("hubspot_created_at", "asc");
+  let q = db
+    .selectFrom("contacts")
+    .selectAll()
+    .orderBy("hubspot_created_at", "asc");
 
   if (since) q = q.where("hubspot_updated_at", ">=", since);
   if (typeof limit === "number") q = q.limit(limit);

@@ -4,12 +4,16 @@ import { getDb } from "../db.js";
 
 import {
   createContact,
-  updateContact,
+  updateContactByHubspotId,
   updateContactByGcid,
-  // getContactByHubspotId,   // not used here
+  updateContactByEither,   // <-- keep
+  getContactByGcid,
+  getContactByHubspotId,
+  getContactByEither,      // <-- keep
   // deleteContactByHubspotId // not used here
   listContacts,
 } from "../queries/contacts.js";
+
 import { fetchRecentContactsFromHubSpot } from "../services/hubspot/contacts.js";
 
 const router = express.Router();
@@ -193,7 +197,7 @@ router.post("/sync", async (req, res) => {
     for (const id of toUpdateIds) {
       try {
         const patch = hsToDb(hsMap.get(id));
-        const r = await updateContact(id, patch);
+        const r = await updateContactByHubspotId(id, patch);
         if (r?.updated) updated++;
       } catch (e) {
         errors.push({ hubspot_id: id, action: "update", error: String(e.message || e) });
@@ -220,7 +224,7 @@ router.post("/sync", async (req, res) => {
         if (e?.code === "23505") {
           // unique constraint -> try update by hubspot_id, then by gcid
           try {
-            const r1 = await updateContact(id, row);
+            const r1 = await updateContactByHubspotId(id, row);
             if (!r1?.updated && row.gcid) {
               const r2 = await updateContactByGcid(row.gcid, row);
               if (r2?.updated) updated++;
@@ -318,6 +322,62 @@ router.get("/", async (_req, res) => {
       `SELECT * FROM hello_hearing.contacts ORDER BY created_at DESC`
     );
     res.json({ count: rows.length, results: rows });
+  } catch (e) {
+    console.error(e);
+    return res.status(400).json({ error: String(e.message || e) });
+  }
+});
+
+// GET /contacts/:id  -> returns a single contact (UUID => gcid, else hubspot_id)
+router.get("/:id", async (req, res) => {
+  try {
+    const id = String(req.params.id || "").trim();
+    if (!id) return res.status(400).json({ error: "Missing id" });
+
+    const row = await getContactByEither(id);
+    if (!row) return res.status(404).json({ error: "Contact not found" });
+
+    return res.json({ result: row });
+  } catch (e) {
+    console.error(e);
+    return res.status(400).json({ error: String(e.message || e) });
+  }
+});
+
+// PATCH /contacts/:id -> partial update by either key; returns updated record
+router.patch("/:id", async (req, res) => {
+  try {
+    const id = String(req.params.id || "").trim();
+    if (!id) return res.status(400).json({ error: "Missing id" });
+
+    const patch = { ...(req.body || {}) };
+    delete patch.hubspot_id;
+    delete patch.gcid;
+
+    const r = await updateContactByEither(id, patch);
+    if (!r?.updated) return res.status(404).json({ error: "Contact not found" });
+
+    return res.status(200).json({ ok: true, result: r.row });
+  } catch (e) {
+    console.error(e);
+    return res.status(400).json({ error: String(e.message || e) });
+  }
+});
+
+// PATCH /contacts/:id -> partial update by either key; returns updated record
+router.put("/upsert", async (req, res) => {
+  try {
+    const id = String(req.params.id || "").trim();
+    if (!id) return res.status(400).json({ error: "Missing id" });
+
+    const patch = { ...(req.body || {}) };
+    delete patch.hubspot_id;
+    delete patch.gcid;
+
+    const r = await updateContactByEither(id, patch);
+    if (!r?.updated) return res.status(404).json({ error: "Contact not found" });
+
+    return res.status(200).json({ ok: true, result: r.row });
   } catch (e) {
     console.error(e);
     return res.status(400).json({ error: String(e.message || e) });
